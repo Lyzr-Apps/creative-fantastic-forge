@@ -376,8 +376,18 @@ function EscalationQueueCard({ call, onTakeCall }: { call: EscalationCall; onTak
 
 // TranscriptDialog Component
 function TranscriptDialog({ callId, isOpen, onClose }: { callId: string; isOpen: boolean; onClose: () => void }) {
-  const transcript = generateMockTranscript(callId)
-  const call = generateMockActiveCalls().find((c) => c.id === callId)
+  const [transcript, setTranscript] = useState<CallTranscript[]>([])
+  const [call, setCall] = useState<ActiveCall | undefined>(undefined)
+
+  useEffect(() => {
+    const currentTime = Date.now()
+    const calls = generateMockActiveCalls(currentTime)
+    const foundCall = calls.find((c) => c.id === callId)
+    setCall(foundCall)
+    if (foundCall) {
+      setTranscript(generateMockTranscript(callId, currentTime))
+    }
+  }, [callId])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -446,7 +456,7 @@ function TranscriptDialog({ callId, isOpen, onClose }: { callId: string; isOpen:
 
 // Dashboard Screen
 function DashboardScreen() {
-  const [currentTime, setCurrentTime] = useState(Date.now())
+  const [mounted, setMounted] = useState(false)
   const [activeCalls, setActiveCalls] = useState<ActiveCall[]>([])
   const [escalationCalls, setEscalationCalls] = useState<EscalationCall[]>([])
   const [analytics] = useState<AnalyticsData>(generateMockAnalytics())
@@ -454,8 +464,10 @@ function DashboardScreen() {
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false)
 
   useEffect(() => {
+    const currentTime = Date.now()
     setActiveCalls(generateMockActiveCalls(currentTime))
     setEscalationCalls(generateMockEscalationCalls(currentTime))
+    setMounted(true)
   }, [])
 
   const handleViewTranscript = (callId: string) => {
@@ -522,12 +534,12 @@ function DashboardScreen() {
 
 // Call Detail Screen
 function CallDetailScreen() {
-  const [currentTime] = useState(Date.now())
   const [selectedCall, setSelectedCall] = useState<ActiveCall | null>(null)
   const [transcript, setTranscript] = useState<CallTranscript[]>([])
   const [internalNote, setInternalNote] = useState('')
 
   useEffect(() => {
+    const currentTime = Date.now()
     const calls = generateMockActiveCalls(currentTime)
     const call = calls[0]
     setSelectedCall(call)
