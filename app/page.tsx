@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Phone, Clock, TrendingUp, AlertCircle, Upload, Search, Send, CheckCircle, X, PhoneOff, Zap } from 'lucide-react'
+import { Phone, Clock, TrendingUp, AlertCircle, Upload, Search, CheckCircle, PhoneOff, Zap } from 'lucide-react'
 
 // Types
 interface ActiveCall {
@@ -61,110 +60,119 @@ interface AnalyticsData {
 }
 
 // Mock data generator
-const generateMockActiveCalls = (): ActiveCall[] => [
-  {
-    id: 'call-001',
-    customerId: 'cust-001',
-    customerName: 'Sarah Johnson',
-    deviceModel: 'VX520',
-    issueCategory: 'WiFi Connectivity',
-    duration: 245,
-    status: 'troubleshooting',
-    sentiment: 'neutral',
-    timestamp: new Date(Date.now() - 4 * 60000).toISOString(),
-  },
-  {
-    id: 'call-002',
-    customerId: 'cust-002',
-    customerName: 'Michael Chen',
-    deviceModel: 'VX690',
-    issueCategory: 'Payment Processing',
-    duration: 180,
-    status: 'greeting',
-    sentiment: 'positive',
-    timestamp: new Date(Date.now() - 3 * 60000).toISOString(),
-  },
-  {
-    id: 'call-003',
-    customerId: 'cust-003',
-    customerName: 'Emma Rodriguez',
-    deviceModel: 'VX805',
-    issueCategory: 'Software Update',
-    duration: 420,
-    status: 'troubleshooting',
-    sentiment: 'frustrated',
-    timestamp: new Date(Date.now() - 7 * 60000).toISOString(),
-  },
-]
+const generateMockActiveCalls = (now?: number): ActiveCall[] => {
+  const currentTime = now || Date.now()
+  return [
+    {
+      id: 'call-001',
+      customerId: 'cust-001',
+      customerName: 'Sarah Johnson',
+      deviceModel: 'VX520',
+      issueCategory: 'WiFi Connectivity',
+      duration: 245,
+      status: 'troubleshooting',
+      sentiment: 'neutral',
+      timestamp: new Date(currentTime - 4 * 60000).toISOString(),
+    },
+    {
+      id: 'call-002',
+      customerId: 'cust-002',
+      customerName: 'Michael Chen',
+      deviceModel: 'VX690',
+      issueCategory: 'Payment Processing',
+      duration: 180,
+      status: 'greeting',
+      sentiment: 'positive',
+      timestamp: new Date(currentTime - 3 * 60000).toISOString(),
+    },
+    {
+      id: 'call-003',
+      customerId: 'cust-003',
+      customerName: 'Emma Rodriguez',
+      deviceModel: 'VX805',
+      issueCategory: 'Software Update',
+      duration: 420,
+      status: 'troubleshooting',
+      sentiment: 'frustrated',
+      timestamp: new Date(currentTime - 7 * 60000).toISOString(),
+    },
+  ]
+}
 
-const generateMockEscalationCalls = (): EscalationCall[] => [
-  {
-    id: 'esc-001',
-    customerName: 'Emma Rodriguez',
-    deviceModel: 'VX805',
-    issueCategory: 'Software Update Issue',
-    waitTime: 3,
-    priority: 'high',
-    timestamp: new Date(Date.now() - 3 * 60000).toISOString(),
-  },
-  {
-    id: 'esc-002',
-    customerName: 'James Wilson',
-    deviceModel: 'VX520',
-    issueCategory: 'Hardware Malfunction',
-    waitTime: 8,
-    priority: 'high',
-    timestamp: new Date(Date.now() - 8 * 60000).toISOString(),
-  },
-  {
-    id: 'esc-003',
-    customerName: 'Lisa Anderson',
-    deviceModel: 'VX690',
-    issueCategory: 'Billing Question',
-    waitTime: 12,
-    priority: 'medium',
-    timestamp: new Date(Date.now() - 12 * 60000).toISOString(),
-  },
-]
+const generateMockEscalationCalls = (now?: number): EscalationCall[] => {
+  const currentTime = now || Date.now()
+  return [
+    {
+      id: 'esc-001',
+      customerName: 'Emma Rodriguez',
+      deviceModel: 'VX805',
+      issueCategory: 'Software Update Issue',
+      waitTime: 3,
+      priority: 'high',
+      timestamp: new Date(currentTime - 3 * 60000).toISOString(),
+    },
+    {
+      id: 'esc-002',
+      customerName: 'James Wilson',
+      deviceModel: 'VX520',
+      issueCategory: 'Hardware Malfunction',
+      waitTime: 8,
+      priority: 'high',
+      timestamp: new Date(currentTime - 8 * 60000).toISOString(),
+    },
+    {
+      id: 'esc-003',
+      customerName: 'Lisa Anderson',
+      deviceModel: 'VX690',
+      issueCategory: 'Billing Question',
+      waitTime: 12,
+      priority: 'medium',
+      timestamp: new Date(currentTime - 12 * 60000).toISOString(),
+    },
+  ]
+}
 
-const generateMockTranscript = (callId: string): CallTranscript[] => [
-  {
-    callId,
-    timestamp: new Date(Date.now() - 240000).toISOString(),
-    speaker: 'ai',
-    message: 'Welcome to Verifone Support. I\'m your AI assistant. How can I help you today?',
-  },
-  {
-    callId,
-    timestamp: new Date(Date.now() - 235000).toISOString(),
-    speaker: 'customer',
-    message: 'Hi, my VX520 terminal isn\'t connecting to WiFi properly.',
-  },
-  {
-    callId,
-    timestamp: new Date(Date.now() - 230000).toISOString(),
-    speaker: 'ai',
-    message: 'I understand you\'re experiencing WiFi connectivity issues with your VX520. Let me help you with that. First, let\'s restart the device. Can you hold the power button for 10 seconds?',
-  },
-  {
-    callId,
-    timestamp: new Date(Date.now() - 220000).toISOString(),
-    speaker: 'customer',
-    message: 'OK, I\'ve held the power button.',
-  },
-  {
-    callId,
-    timestamp: new Date(Date.now() - 210000).toISOString(),
-    speaker: 'ai',
-    message: 'Great! Now the device should be booting up. While it restarts, let\'s check your router. Can you confirm your WiFi is working on other devices?',
-  },
-  {
-    callId,
-    timestamp: new Date(Date.now() - 200000).toISOString(),
-    speaker: 'customer',
-    message: 'Yes, my phone and laptop are both connected fine.',
-  },
-]
+const generateMockTranscript = (callId: string, now?: number): CallTranscript[] => {
+  const currentTime = now || Date.now()
+  return [
+    {
+      callId,
+      timestamp: new Date(currentTime - 240000).toISOString(),
+      speaker: 'ai',
+      message: 'Welcome to Verifone Support. I\'m your AI assistant. How can I help you today?',
+    },
+    {
+      callId,
+      timestamp: new Date(currentTime - 235000).toISOString(),
+      speaker: 'customer',
+      message: 'Hi, my VX520 terminal isn\'t connecting to WiFi properly.',
+    },
+    {
+      callId,
+      timestamp: new Date(currentTime - 230000).toISOString(),
+      speaker: 'ai',
+      message: 'I understand you\'re experiencing WiFi connectivity issues with your VX520. Let me help you with that. First, let\'s restart the device. Can you hold the power button for 10 seconds?',
+    },
+    {
+      callId,
+      timestamp: new Date(currentTime - 220000).toISOString(),
+      speaker: 'customer',
+      message: 'OK, I\'ve held the power button.',
+    },
+    {
+      callId,
+      timestamp: new Date(currentTime - 210000).toISOString(),
+      speaker: 'ai',
+      message: 'Great! Now the device should be booting up. While it restarts, let\'s check your router. Can you confirm your WiFi is working on other devices?',
+    },
+    {
+      callId,
+      timestamp: new Date(currentTime - 200000).toISOString(),
+      speaker: 'customer',
+      message: 'Yes, my phone and laptop are both connected fine.',
+    },
+  ]
+}
 
 const generateMockAnalytics = (): AnalyticsData => ({
   totalCalls: 1247,
@@ -438,11 +446,17 @@ function TranscriptDialog({ callId, isOpen, onClose }: { callId: string; isOpen:
 
 // Dashboard Screen
 function DashboardScreen() {
-  const [activeCalls, setActiveCalls] = useState<ActiveCall[]>(generateMockActiveCalls())
-  const [escalationCalls, setEscalationCalls] = useState<EscalationCall[]>(generateMockEscalationCalls())
+  const [currentTime, setCurrentTime] = useState(Date.now())
+  const [activeCalls, setActiveCalls] = useState<ActiveCall[]>([])
+  const [escalationCalls, setEscalationCalls] = useState<EscalationCall[]>([])
   const [analytics] = useState<AnalyticsData>(generateMockAnalytics())
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null)
   const [isTranscriptOpen, setIsTranscriptOpen] = useState(false)
+
+  useEffect(() => {
+    setActiveCalls(generateMockActiveCalls(currentTime))
+    setEscalationCalls(generateMockEscalationCalls(currentTime))
+  }, [])
 
   const handleViewTranscript = (callId: string) => {
     setSelectedCallId(callId)
@@ -508,9 +522,25 @@ function DashboardScreen() {
 
 // Call Detail Screen
 function CallDetailScreen() {
-  const [selectedCall, setSelectedCall] = useState<ActiveCall>(generateMockActiveCalls()[0])
-  const [transcript] = useState<CallTranscript[]>(generateMockTranscript(selectedCall.id))
+  const [currentTime] = useState(Date.now())
+  const [selectedCall, setSelectedCall] = useState<ActiveCall | null>(null)
+  const [transcript, setTranscript] = useState<CallTranscript[]>([])
   const [internalNote, setInternalNote] = useState('')
+
+  useEffect(() => {
+    const calls = generateMockActiveCalls(currentTime)
+    const call = calls[0]
+    setSelectedCall(call)
+    setTranscript(generateMockTranscript(call.id, currentTime))
+  }, [])
+
+  if (!selectedCall) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <p className="text-gray-600">Loading call details...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
